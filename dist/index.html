@@ -7,12 +7,12 @@
   <body>
     <style>
       body {
-        padding: 0;
+        padding: 40px;
         margin: 0;
         height: 100vh;
-        display: flex;
+        /*display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: center;*/
         background-color: #222;
         font-family: serif;
       }
@@ -38,16 +38,20 @@
       canvas {
         display: block;
       }
+
+      #canvas1 {
+        width: 240px;
+        height: 180px;
+        margin-top: 50px;
+      }
     </style>
+    <!--
     <div>
-      <a href="?letter=%E6%97%A5">日</a>
-      <a href="?letter=%E6%96%B0">新</a>
-      <a href="?letter=%E8%81%9E">聞</a>
-      <a href="?letter=%E4%BA%80">亀</a>
-      <a href="?letter=%E7%B5%8C">経</a>
-      <a href="?letter=%E5%AD%A6">学</a>
+      <a href="?a=1">1</a>
     </div>
+  -->
     <div class="wrapper" id="wrapper"></div>
+    <canvas id="canvas1" width="80" height="60"></canvas>
     <script type="text/javascript" src="main.js"></script>
   </body>
 </html>

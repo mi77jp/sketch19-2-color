@@ -1,7 +1,7 @@
 {
-  "name": "webgl-trial",
+  "name": "sketch19-2-color ",
   "version": "1.0.0",
-  "description": "My webpack project",
+  "description": "",
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mi77jp/webgl-trial.git"
+    "url": "git+https://github.com/mi77jp/sketch19-2-color.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mi77jp/webgl-trial/issues"
+    "url": "https://github.com/mi77jp/sketch19-2-color/issues"
   },
-  "homepage": "https://github.com/mi77jp/webgl-trial#readme",
+  "homepage": "https://github.com/mi77jp/sketch19-2-color#readme",
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",
@@ -31,6 +31,7 @@
     "node-sass": "^4.13.0",
     "sass-loader": "^8.0.0",
     "style-loader": "^1.0.0",
+    "three-orbitcontrols": "^2.110.1",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.9.0"

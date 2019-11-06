@@ -1,17 +1,52 @@
 import * as THREE from 'three';
+import * as OrbitControls from 'three-orbitcontrols';
 
 (function () {
 
   const letter = getParam('letter');
-  const fontFilePath = 'shirakawa-kinbun_v1.03.json';
+  const filePath = 'lena.png';//'color.png';
+  let animSeed = {
+    cir: 0,
+    circMax: 360
+  };
+  const basePosition = [0,0,0];
+  const gridSize = 10;
 
-  let scene, camera, renderer, fontLoader;
-  let boxGeometry, textGeometry, material, phongMaterial, meshForBox, meshForText, floor;
+  let scene, camera, renderer;
+  let boxGeometry, material, meshForBox, floor;
   let directionalLight, ambientLight;
+  let boxes;
 
   function initialize() {
-    fontLoader = new THREE.FontLoader();
-    fontLoader.load( fontFilePath, initThreeObjects);
+    getImageData(initThreeObjects);
+  }
+
+  function getImageData (callback) {
+    let imageMatrix = [];
+    let cvs = document.getElementById('canvas1');
+    let ctx = cvs.getContext('2d');
+    let img = new Image();
+    img.src = filePath;
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0, 80, 60);
+      let imageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+      let width = imageData.width;
+      let height = imageData.height;
+      let pixels = imageData.data;  // ピクセル配列：RGBA4要素で1ピクセル
+      for (let y = 0; y < height; ++y) {
+        imageMatrix[y] = [];
+        for (let x = 0; x < width; ++x) {
+          let base = (y * width + x) * 4;
+          imageMatrix[y][x] = {
+            r: imageData.data[base + 0],
+            g: imageData.data[base + 1],
+            b: imageData.data[base + 2],
+            a: imageData.data[base + 3]
+          };
+        }
+      }
+      callback(imageMatrix)
+    }
   }
 
   /* NOTE: [ hierarchy image ]
@@ -21,13 +56,13 @@ import * as THREE from 'three';
         - Light
         - Mesh (Geometry, Material)
   */
-  function initThreeObjects (fontData) {
+  function initThreeObjects (imageMatrix) {
 
     // 1. Scene
     scene = new THREE.Scene();
 
     // 2. Camera
-    camera = new THREE.PerspectiveCamera( 50, 1, 1, 10000);// (視野角, アスペクト比, near, far)
+    camera = new THREE.PerspectiveCamera( 90, 1, 1, 2400);// (視野角, アスペクト比, near, far)
     camera.position.z = 500;
 
     // Floor
@@ -39,20 +74,9 @@ import * as THREE from 'three';
 
     // 3. Geometry
     boxGeometry = new THREE.BoxGeometry( 200, 200, 200 );// (幅, 高さ, 奥行き)
-    textGeometry = new THREE.TextGeometry( letter, {
-      font: fontData,
-      size: 250,
-      height: 20,
-      curveSegments: 4,
-      bevelEnabled: true,
-      bevelThickness: 4,
-      bevelSize: 4,
-      bevelSegments: 1
-    });
 
     // 4. Materials
     material = new THREE.MeshBasicMaterial( {color: 0x999999, wireframe: true} );
-    phongMaterial = new THREE.MeshPhongMaterial({color: 0x999999, specular: 0xffffff});
 
     // 5. Meshs
     meshForBox = new THREE.Mesh( boxGeometry, material );
@@ -60,12 +84,6 @@ import * as THREE from 'three';
     meshForBox.rotation.y = 45;
     meshForBox.castShadow = true;
     //scene.add( meshForBox );
-
-    meshForText = new THREE.Mesh( textGeometry, phongMaterial );
-    meshForText.position.x = -250;
-    meshForText.position.y = -100;
-    meshForText.position.x = -100;
-    scene.add( meshForText );
 
     // 6. Lights
     ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
@@ -86,15 +104,102 @@ import * as THREE from 'three';
     // 8. Append objects to DOM
     document.getElementById('wrapper').appendChild( renderer.domElement );
 
-    // 9. Run the world
-    run();
+    // 9. Color
+    boxes = [];
+    for (let y = 0; y < imageMatrix.length; ++y) {
+      boxes[y] = [];
+      for (let x = 0; x < imageMatrix[y].length; ++x) {
+        boxes[y][x] = [];
+        boxes[y][x].layers = { r: {}, g: {}, b: {}};
+
+        // R
+        boxes[y][x].layers.r.geometry = new THREE.BoxGeometry( gridSize, gridSize, gridSize);
+        boxes[y][x].layers.r.material = new THREE.MeshBasicMaterial( {
+          color: new THREE.Color(imageMatrix[y][x].r/255, 0, 0),
+          blending: THREE.AdditiveBlending
+        });
+        boxes[y][x].layers.r.mesh = new THREE.Mesh( boxes[y][x].layers.r.geometry, boxes[y][x].layers.r.material );
+        boxes[y][x].layers.r.mesh.position.set(
+          basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
+          basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
+          basePosition[2] - 0
+        );
+        scene.add( boxes[y][x].layers.r.mesh );
+
+        // G
+        boxes[y][x].layers.g.geometry = new THREE.BoxGeometry( gridSize, gridSize, gridSize);
+        boxes[y][x].layers.g.material = new THREE.MeshBasicMaterial( {
+          color: new THREE.Color(0, imageMatrix[y][x].g/255, 0),
+          blending: THREE.AdditiveBlending
+        });
+        boxes[y][x].layers.g.mesh = new THREE.Mesh( boxes[y][x].layers.g.geometry, boxes[y][x].layers.g.material );
+        boxes[y][x].layers.g.mesh.position.set(
+          basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
+          basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
+          basePosition[2] - gridSize * 2
+        );
+        scene.add( boxes[y][x].layers.g.mesh );
+
+        // B
+        boxes[y][x].layers.b.geometry = new THREE.BoxGeometry( gridSize, gridSize, gridSize);
+        boxes[y][x].layers.b.material = new THREE.MeshBasicMaterial( {
+          color: new THREE.Color(0, 0, imageMatrix[y][x].b/255),
+          blending: THREE.AdditiveBlending
+        });
+        boxes[y][x].layers.b.mesh = new THREE.Mesh( boxes[y][x].layers.b.geometry, boxes[y][x].layers.b.material );
+        boxes[y][x].layers.b.mesh.position.set(
+          basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
+          basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
+          basePosition[2] - gridSize * 4
+        );
+        scene.add( boxes[y][x].layers.b.mesh );
+      }
+    }
+
+    // 9. Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.enableZoom = false;
+
+    // 10. Run the world
+    requestAnimationFrame( run );
   }
 
-  function run() {
-    requestAnimationFrame( run );
-    meshForBox.rotation.y -= 0.003;
-    meshForText.rotation.y += 0.002;
+  function run () {
+    //meshForBox.rotation.y -= 0.003;
     renderer.render( scene, camera );
+    //
+    animSeed.circ ++;
+    if(animSeed.circ > animSeed.circMax) animSeed.circ = 0;
+
+    for (let y = 0; y < boxes.length; ++y) {
+      for (let x = 0; x < boxes[y].length; ++x) {
+        // R
+        /*
+        boxes[y][x].layers.r.mesh.position.set(
+          basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+          basePosition[1] - gridSize * (boxes.length/-2 + y),
+          basePosition[2] + gridSize * Math.sin(animSeed.circ)
+        );*/
+
+        // G
+        /*
+        boxes[y][x].layers.g.mesh.position.set(
+          basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+          basePosition[1] - gridSize * (boxes.length/-2 + y),
+          basePosition[2] - gridSize;
+        );*/
+
+        // B
+        /*boxes[y][x].layers.b.mesh.position.set(
+          basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+          basePosition[1] - gridSize * (boxes.length/-2 + y),
+          basePosition[2] - 0
+        );*/
+      }
+    }
+    requestAnimationFrame( run );
   }
 
   function getParam(name, url) {
