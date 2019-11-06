@@ -5,12 +5,12 @@ import * as OrbitControls from 'three-orbitcontrols';
 
   const letter = getParam('letter');
   const filePath = 'lena.png';//'color.png';
-  let animSeed = {
-    cir: 0,
-    circMax: 360
-  };
   const basePosition = [0,0,0];
   const gridSize = 10;
+  let animSeed = {
+    circ: 0,
+    circMax: 360
+  };
 
   let scene, camera, renderer;
   let boxGeometry, material, meshForBox, floor;
@@ -67,9 +67,8 @@ import * as OrbitControls from 'three-orbitcontrols';
 
     // Floor
     floor = new THREE.GridHelper(10000, 80);
-    floor.material.color = new THREE.Color(0x222222);
-    floor.position.set(0, -200, 0);
-    floor.rotation.y = 5;
+    floor.material.color = new THREE.Color(0x999999);
+    floor.position.set(0, -300, 0);
     scene.add(floor);
 
     // 3. Geometry
@@ -122,7 +121,7 @@ import * as OrbitControls from 'three-orbitcontrols';
         boxes[y][x].layers.r.mesh.position.set(
           basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
           basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
-          basePosition[2] - 0
+          basePosition[2] - gridSize * 2
         );
         scene.add( boxes[y][x].layers.r.mesh );
 
@@ -136,7 +135,7 @@ import * as OrbitControls from 'three-orbitcontrols';
         boxes[y][x].layers.g.mesh.position.set(
           basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
           basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
-          basePosition[2] - gridSize * 2
+          basePosition[2] - gridSize * 1
         );
         scene.add( boxes[y][x].layers.g.mesh );
 
@@ -150,7 +149,7 @@ import * as OrbitControls from 'three-orbitcontrols';
         boxes[y][x].layers.b.mesh.position.set(
           basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
           basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
-          basePosition[2] - gridSize * 4
+          basePosition[2] - gridSize * 0
         );
         scene.add( boxes[y][x].layers.b.mesh );
       }
@@ -170,35 +169,68 @@ import * as OrbitControls from 'three-orbitcontrols';
     //meshForBox.rotation.y -= 0.003;
     renderer.render( scene, camera );
     //
-    animSeed.circ ++;
+    animSeed.circ += 0.02;
     if(animSeed.circ > animSeed.circMax) animSeed.circ = 0;
+    //console.log(animSeed.circ, Math.sin(animSeed.circ));
 
-    for (let y = 0; y < boxes.length; ++y) {
-      for (let x = 0; x < boxes[y].length; ++x) {
-        // R
-        /*
-        boxes[y][x].layers.r.mesh.position.set(
-          basePosition[0] + gridSize * (boxes[y].length/-2 + x),
-          basePosition[1] - gridSize * (boxes.length/-2 + y),
-          basePosition[2] + gridSize * Math.sin(animSeed.circ)
-        );*/
+    if (getParam('mode') == 1) {
+      for (let y = 0; y < boxes.length; ++y) {
+        for (let x = 0; x < boxes[y].length; ++x) {
+          // R
+          boxes[y][x].layers.r.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] + gridSize * Math.sin(animSeed.circ) * 4
+          );
 
-        // G
-        /*
-        boxes[y][x].layers.g.mesh.position.set(
-          basePosition[0] + gridSize * (boxes[y].length/-2 + x),
-          basePosition[1] - gridSize * (boxes.length/-2 + y),
-          basePosition[2] - gridSize;
-        );*/
-
-        // B
-        /*boxes[y][x].layers.b.mesh.position.set(
-          basePosition[0] + gridSize * (boxes[y].length/-2 + x),
-          basePosition[1] - gridSize * (boxes.length/-2 + y),
-          basePosition[2] - 0
-        );*/
+          // G
+          boxes[y][x].layers.g.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] - gridSize * Math.cos(animSeed.circ) * 4
+          );
+        }
       }
+    } else if (getParam('mode') == 2) {
+      for (let y = 0; y < boxes.length; ++y) {
+        for (let x = 0; x < boxes[y].length; ++x) {
+          // R
+          boxes[y][x].layers.r.mesh.scale.set(
+            Math.sin(animSeed.circ) * 1.4,
+            Math.sin(animSeed.circ) * 1.4,
+            Math.sin(animSeed.circ) * 1.4
+          );
+          // G
+          boxes[y][x].layers.g.mesh.scale.set(
+            Math.cos(animSeed.circ) * 1.4,
+            Math.cos(animSeed.circ) * 1.4,
+            Math.cos(animSeed.circ) * 1.4
+          );
+        }
+      }
+    } else {
+      // R
+      boxes[y][x].layers.r.mesh.position.set(
+        basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
+        basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
+        basePosition[2] - gridSize * 2
+      );
+
+      // G
+      boxes[y][x].layers.g.mesh.position.set(
+        basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
+        basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
+        basePosition[2] - gridSize * 1
+      );
+
+      // B
+      boxes[y][x].layers.b.mesh.position.set(
+        basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
+        basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
+        basePosition[2] - gridSize * 0
+      );
     }
+
     requestAnimationFrame( run );
   }
 
