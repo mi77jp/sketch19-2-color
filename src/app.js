@@ -209,26 +209,33 @@ import * as OrbitControls from 'three-orbitcontrols';
         }
       }
     } else {
-      // R
-      boxes[y][x].layers.r.mesh.position.set(
-        basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
-        basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
-        basePosition[2] - gridSize * 2
-      );
+      for (let y = 0; y < boxes.length; ++y) {
+        for (let x = 0; x < boxes[y].length; ++x) {
+          // R
+          boxes[y][x].layers.r.mesh.scale.set(1,1,1);
+          boxes[y][x].layers.r.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] - gridSize * 2
+          );
 
-      // G
-      boxes[y][x].layers.g.mesh.position.set(
-        basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
-        basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
-        basePosition[2] - gridSize * 1
-      );
+          // G
+          boxes[y][x].layers.g.mesh.scale.set(1,1,1);
+          boxes[y][x].layers.g.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] - gridSize * 1
+          );
 
-      // B
-      boxes[y][x].layers.b.mesh.position.set(
-        basePosition[0] + gridSize * (imageMatrix[y].length/-2 + x),
-        basePosition[1] - gridSize * (imageMatrix.length/-2 + y),
-        basePosition[2] - gridSize * 0
-      );
+          // B
+          boxes[y][x].layers.b.mesh.scale.set(1,1,1);
+          boxes[y][x].layers.b.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] - gridSize * 0
+          );
+        }
+      }
     }
 
     requestAnimationFrame( run );
