@@ -13,7 +13,7 @@ import * as OrbitControls from 'three-orbitcontrols';
   };
 
   let scene, camera, renderer;
-  let boxGeometry, material, meshForBox, floor;
+  let material, floor;
   let directionalLight, ambientLight;
   let boxes;
 
@@ -56,6 +56,7 @@ import * as OrbitControls from 'three-orbitcontrols';
         - Light
         - Mesh (Geometry, Material)
   */
+
   function initThreeObjects (imageMatrix) {
 
     // 1. Scene
@@ -65,24 +66,14 @@ import * as OrbitControls from 'three-orbitcontrols';
     camera = new THREE.PerspectiveCamera( 90, 1, 1, 2400);// (視野角, アスペクト比, near, far)
     camera.position.z = 500;
 
-    // Floor
+    // 3. Floor
     floor = new THREE.GridHelper(10000, 80);
     floor.material.color = new THREE.Color(0x999999);
     floor.position.set(0, -300, 0);
     scene.add(floor);
 
-    // 3. Geometry
-    boxGeometry = new THREE.BoxGeometry( 200, 200, 200 );// (幅, 高さ, 奥行き)
-
     // 4. Materials
     material = new THREE.MeshBasicMaterial( {color: 0x999999, wireframe: true} );
-
-    // 5. Meshs
-    meshForBox = new THREE.Mesh( boxGeometry, material );
-    meshForBox.position.set(0,1,100);
-    meshForBox.rotation.y = 45;
-    meshForBox.castShadow = true;
-    //scene.add( meshForBox );
 
     // 6. Lights
     ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
@@ -166,12 +157,10 @@ import * as OrbitControls from 'three-orbitcontrols';
   }
 
   function run () {
-    //meshForBox.rotation.y -= 0.003;
     renderer.render( scene, camera );
     //
     animSeed.circ += 0.02;
     if(animSeed.circ > animSeed.circMax) animSeed.circ = 0;
-    //console.log(animSeed.circ, Math.sin(animSeed.circ));
 
     if (getParam('mode') == 1) {
       for (let y = 0; y < boxes.length; ++y) {
@@ -205,6 +194,25 @@ import * as OrbitControls from 'three-orbitcontrols';
             Math.cos(animSeed.circ) * 1.4,
             Math.cos(animSeed.circ) * 1.4,
             Math.cos(animSeed.circ) * 1.4
+          );
+        }
+      }
+    } else if (getParam('mode') == 3) {
+      let dotIndexGap;
+      for (let y = 0; y < boxes.length; ++y) {
+        for (let x = 0; x < boxes[y].length; ++x) {
+          dotIndexGap = (y * boxes.length + x) / boxes.length*boxes[y].length;// ratio
+          // G
+          boxes[y][x].layers.g.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] + gridSize * Math.sin(animSeed.circ * dotIndexGap/Math.PI + 180) * 2
+          );
+          // B
+          boxes[y][x].layers.b.mesh.position.set(
+            basePosition[0] + gridSize * (boxes[y].length/-2 + x),
+            basePosition[1] - gridSize * (boxes.length/-2 + y),
+            basePosition[2] + gridSize * Math.sin(animSeed.circ * dotIndexGap/Math.PI ) * 2
           );
         }
       }
